@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var addr string = "0.0.0.0:5051"
+var addr string = "0.0.0.0:50051"
 
 type Server struct {
 	pb.GreetServiceServer
@@ -24,6 +24,7 @@ func main() {
 	log.Println("Server started on Address: ", addr)
 
 	server := grpc.NewServer()
+	pb.RegisterGreetServiceServer(server, &Server{})
 
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("Error on start gRPC server: %v \n", err)

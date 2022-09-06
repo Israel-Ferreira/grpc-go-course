@@ -1,13 +1,20 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 
+	pb "github.com/Israel-Ferreira/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var addr string = " 0.0.0.0:5051"
+var addr string = "0.0.0.0:50051"
+
+type GreetClientService struct {
+	pb.GreetServiceClient
+}
 
 func main() {
 
@@ -18,5 +25,15 @@ func main() {
 	}
 
 	defer conn.Close()
+
+	c := pb.NewGreetServiceClient(conn)
+
+	result, err  := c.Greet(context.Background(), &pb.GreetRequest{FirstName: "Israel"})
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Println(result)
 
 }

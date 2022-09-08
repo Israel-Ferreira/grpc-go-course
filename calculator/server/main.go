@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -22,6 +23,35 @@ func (s *SumService) Sum(ctx context.Context, in *pb.SumRequest) (*pb.SumRespons
 	result := a + b
 
 	return &pb.SumResponse{Result: result}, nil
+}
+
+func (s *SumService) DecompositePrime(in *pb.PrimeDecompositionRequest, stream pb.CalculatorService_DecompositePrimeServer) error {
+	k := 2
+
+	n := int(in.Num)
+
+	var factors []int64
+
+	for n > 1 {
+		if n%k == 0 {
+			fmt.Println(k)
+			n = n / k
+
+			factors = append(factors, int64(k))
+		} else {
+			k += 1
+		}
+	}
+
+	for _, factor := range factors {
+		res := &pb.PrimeDecompositionResponse{Factor: factor}
+
+		if err := stream.Send(res); err != nil {
+			log.Fatalf("Error on Sending response to client: %v \n", err)
+		}
+	}
+
+	return nil
 }
 
 func main() {

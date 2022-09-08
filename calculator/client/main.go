@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/calculator/proto"
@@ -35,4 +36,41 @@ func main() {
 
 		fmt.Println(result.Result)
 	}
+
+	doDecompositePrime(service)
+}
+
+func doDecompositePrime(c pb.CalculatorServiceClient) {
+	req := &pb.PrimeDecompositionRequest{
+		Num: 13,
+	}
+
+	stream, err := c.DecompositePrime(context.Background(), req)
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	var factors []int64
+
+	for {
+		msg, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		factors = append(factors, msg.Factor)
+	}
+
+	if len(factors) == 1 && factors[0] == req.Num {
+		fmt.Printf("%d is prime \n", req.Num)
+	} else {
+		fmt.Printf("%d is not a prime, factors : %v", req.Num, factors)
+	}
+
 }

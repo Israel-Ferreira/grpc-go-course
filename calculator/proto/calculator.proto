@@ -12,6 +12,15 @@ message SumRequest {
 }
 
 
+message AvgRequest {
+    int64 num = 1;
+}
+
+message AvgResponse {
+    double result = 1;
+}
+
+
 message SumResponse {
     int64 result = 1;
 }
@@ -29,4 +38,5 @@ message PrimeDecompositionResponse {
 service CalculatorService {
     rpc Sum(SumRequest) returns (SumResponse);
     rpc DecompositePrime(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse);
+    rpc Avg(stream AvgRequest) returns (AvgResponse);
 }

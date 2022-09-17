@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -52,6 +53,38 @@ func (s *SumService) DecompositePrime(in *pb.PrimeDecompositionRequest, stream p
 	}
 
 	return nil
+}
+
+func (s *SumService) Avg(stream pb.CalculatorService_AvgServer) error {
+	var numbers []int64
+
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			total := float64(sum(numbers) / int64(len(numbers)))
+
+			return stream.SendAndClose(&pb.AvgResponse{Result: total})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Número Enviado pela Stream: %d \n", req.Num)
+
+		numbers = append(numbers, req.Num)
+	}
+}
+
+func sum(numbers []int64) int64 {
+	var sumResult int64
+
+	for _, num := range numbers {
+		sumResult += num
+	}
+
+	return sumResult
 }
 
 func main() {

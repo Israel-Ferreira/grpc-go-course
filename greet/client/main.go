@@ -108,4 +108,12 @@ func doLongGreet(c pb.GreetServiceClient) {
 		stream.Send(person)
 		time.Sleep(time.Second * 1)
 	}
+
+	res, err := stream.CloseAndRecv()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res.Result)
 }

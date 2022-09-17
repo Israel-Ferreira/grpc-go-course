@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"time"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
@@ -82,4 +83,29 @@ func main() {
 	fmt.Println(result)
 
 	doGreetManyTimes(c)
+
+	doLongGreet(c)
+}
+
+func doLongGreet(c pb.GreetServiceClient) {
+	reqArr := []*pb.GreetRequest{
+		{FirstName: "Israel"},
+		{FirstName: "Marina"},
+		{FirstName: "Matheus"},
+		{FirstName: "Mariana"},
+		{FirstName: "Denilson"},
+	}
+
+	stream, err := c.LongGreet(context.Background())
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, person := range reqArr {
+		log.Println("Sending stream to long greet")
+
+		stream.Send(person)
+		time.Sleep(time.Second * 1)
+	}
 }

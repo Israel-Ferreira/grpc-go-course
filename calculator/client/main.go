@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/calculator/proto"
 	"google.golang.org/grpc"
@@ -38,6 +39,34 @@ func main() {
 	}
 
 	doDecompositePrime(service)
+
+	doGetAvg(service)
+}
+
+func doGetAvg(c pb.CalculatorServiceClient) {
+	log.Println("Invoke Avg Function")
+
+	numbers := []int64{1, 2, 10, 9, 8, 7, 6}
+
+	stream, err := c.Avg(context.Background())
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, num := range numbers {
+		stream.Send(&pb.AvgRequest{Num: num})
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	res, err := stream.CloseAndRecv()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res.Result)
+
 }
 
 func doDecompositePrime(c pb.CalculatorServiceClient) {

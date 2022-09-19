@@ -85,7 +85,10 @@ func main() {
 	doGreetManyTimes(c)
 
 	doLongGreet(c)
+
+	doGreetEveryone(c)
 }
+
 
 func doLongGreet(c pb.GreetServiceClient) {
 	reqArr := []*pb.GreetRequest{
@@ -116,4 +119,60 @@ func doLongGreet(c pb.GreetServiceClient) {
 	}
 
 	fmt.Println(res.Result)
+}
+
+func doGreetEveryone(c pb.GreetServiceClient) {
+
+	log.Println("doGreetEveryone was Invoked")
+
+	stream, err := c.GreetEveryone(context.Background())
+
+	if err != nil {
+		log.Fatalf("Error: %v \n", err)
+	}
+
+	reqs := []*pb.GreetRequest{
+		{FirstName: "Israel"},
+		{FirstName: "Nickolas"},
+		{FirstName: "Milena"},
+		{FirstName: "Ciro"},
+		{FirstName: "Gabriel"},
+		{FirstName: "Amanda"},
+		{FirstName: "Marina"},
+	}
+
+	waitc := make(chan struct{})
+
+	go func() {
+		for _, req := range reqs {
+			log.Println("Send Request to GRPC")
+			stream.Send(req)
+
+			time.Sleep(1 * time.Second)
+		}
+
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+
+			if err == io.EOF {
+				break
+			}
+
+			if err != nil {
+				log.Printf("Error while Receiving response: %v \n", err)
+				break
+			}
+
+			fmt.Printf("Received Msg: %s \n", res.Result)
+		}
+
+		close(waitc)
+	}()
+
+	<-waitc
+
 }

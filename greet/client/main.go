@@ -10,7 +10,9 @@ import (
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 var addr string = "0.0.0.0:50051"
@@ -87,8 +89,10 @@ func main() {
 	doLongGreet(c)
 
 	doGreetEveryone(c)
-}
 
+	doGreetWithDeadline(c, 5*time.Second)
+	doGreetWithDeadline(c, 1*time.Second)
+}
 
 func doLongGreet(c pb.GreetServiceClient) {
 	reqArr := []*pb.GreetRequest{
@@ -174,5 +178,33 @@ func doGreetEveryone(c pb.GreetServiceClient) {
 	}()
 
 	<-waitc
+
+}
+
+func doGreetWithDeadline(c pb.GreetServiceClient, timeout time.Duration) {
+	log.Println("Greet with Deadline was invoked")
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+
+	defer cancel()
+
+	req := &pb.GreetRequest{FirstName: "Israel"}
+
+	res, err := c.GreetWithDeadline(ctx, req)
+
+	if err != nil {
+		e, ok := status.FromError(err)
+
+		if ok {
+			if e.Code() == codes.DeadlineExceeded {
+				log.Printf("Deadline Exceeded: %s \n", e.Code())
+				return
+			}
+		} else {
+			log.Fatalf("non gRPC Error: %v \n", err)
+		}
+	}
+
+	log.Printf("GreetWithDeadline: %v \n", res)
 
 }

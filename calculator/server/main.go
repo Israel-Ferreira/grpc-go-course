@@ -80,6 +80,30 @@ func (s *SumService) Avg(stream pb.CalculatorService_AvgServer) error {
 	}
 }
 
+func (s *SumService) Max(stream pb.CalculatorService_MaxServer) error {
+	var lastMaxNum int64
+
+	for {
+		rec, err := stream.Recv()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		num := rec.Num
+
+		if num > lastMaxNum {
+			stream.Send(&pb.MaxMsgResponse{Result: num})
+			lastMaxNum = num
+		}
+	}
+
+}
+
 func sum(numbers []int64) float64 {
 	var sumResult float64
 

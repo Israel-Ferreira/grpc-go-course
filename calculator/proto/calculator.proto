@@ -35,8 +35,19 @@ message PrimeDecompositionResponse {
 }
 
 
+message MaxMsgRequest {
+    int64 num = 1;
+}
+
+
+message MaxMsgResponse {
+    int64 result = 1;
+}
+
+
 service CalculatorService {
     rpc Sum(SumRequest) returns (SumResponse);
     rpc DecompositePrime(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse);
     rpc Avg(stream AvgRequest) returns (AvgResponse);
+    rpc Max(stream MaxMsgRequest) returns (stream MaxMsgResponse);
 }

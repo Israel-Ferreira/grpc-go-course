@@ -11,7 +11,7 @@ import (
 	pb "github.com/Israel-Ferreira/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -66,7 +66,22 @@ func doGreetManyTimes(c pb.GreetServiceClient) {
 
 func main() {
 
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	tls := true
+
+	opts := []grpc.DialOption{}
+
+	if tls {
+		certFile := "ssl/ca.crt"
+		creds, err := credentials.NewClientTLSFromFile(certFile, "localhost")
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	}
+
+	conn, err := grpc.Dial(addr, opts...)
 
 	if err != nil {
 		log.Fatalf("Failed to connect in gRPC server: %v \n ", err.Error())

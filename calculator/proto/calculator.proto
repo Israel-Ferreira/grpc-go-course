@@ -5,6 +5,7 @@ package calculator;
 
 option go_package = "github.com/Israel-Ferreira/grpc-go-course/calculator/proto";
 
+import "sqrt.proto";
 
 message SumRequest {
     int64 num1 = 1;
@@ -45,9 +46,11 @@ message MaxMsgResponse {
 }
 
 
+
 service CalculatorService {
     rpc Sum(SumRequest) returns (SumResponse);
     rpc DecompositePrime(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse);
     rpc Avg(stream AvgRequest) returns (AvgResponse);
     rpc Max(stream MaxMsgRequest) returns (stream MaxMsgResponse);
+    rpc Sqrt(SqrtRequest) returns (SqrtResponse);
 }

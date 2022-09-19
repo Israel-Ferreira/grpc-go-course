@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/calculator/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var addr string = "0.0.0.0:50091"
@@ -102,6 +105,23 @@ func (s *SumService) Max(stream pb.CalculatorService_MaxServer) error {
 		}
 	}
 
+}
+
+func (s *SumService) Sqrt(ctx context.Context, in *pb.SqrtRequest) (*pb.SqrtResponse, error) {
+	log.Printf("Sqrt Function Was Invoked: %v \n", in)
+
+	num := in.Num
+
+	if num < 0 {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Received a negative number %d \n", num),
+		)
+	}
+
+	return &pb.SqrtResponse{
+		Result: math.Sqrt(float64(num)),
+	}, nil
 }
 
 func sum(numbers []int64) float64 {

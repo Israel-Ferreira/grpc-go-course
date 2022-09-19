@@ -43,6 +43,8 @@ func main() {
 	doGetAvg(service)
 
 	doMax(service)
+
+	doSqrt(service)
 }
 
 func doGetAvg(c pb.CalculatorServiceClient) {
@@ -158,4 +160,18 @@ func doMax(c pb.CalculatorServiceClient) {
 
 	<-waitch
 
+}
+
+func doSqrt(c pb.CalculatorServiceClient) {
+	log.Println("Invoke Sqrt Func")
+
+	num := 81
+
+	res, err := c.Sqrt(context.Background(), &pb.SqrtRequest{Num: int32(num)})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("Square Root Result is: %.2f \n", res.Result)
 }

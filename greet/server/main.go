@@ -7,6 +7,7 @@ import (
 	pb "github.com/Israel-Ferreira/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/reflection"
 )
 
 var addr string = "0.0.0.0:50051"
@@ -42,6 +43,8 @@ func main() {
 
 	server := grpc.NewServer(opts...)
 	pb.RegisterGreetServiceServer(server, &Server{})
+
+	reflection.Register(server)
 
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("Error on start gRPC server: %v \n", err)

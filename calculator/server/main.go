@@ -11,6 +11,7 @@ import (
 	pb "github.com/Israel-Ferreira/grpc-go-course/calculator/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -144,6 +145,8 @@ func main() {
 	server := grpc.NewServer()
 
 	pb.RegisterCalculatorServiceServer(server, &SumService{})
+
+	reflection.Register(server)
 
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("Error on Create gRPC: %v \n", err)

@@ -9,7 +9,9 @@ import (
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/calculator/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 var addr string = "0.0.0.0:50091"
@@ -44,7 +46,7 @@ func main() {
 
 	doMax(service)
 
-	doSqrt(service)
+	doSqrt(service, 10)
 }
 
 func doGetAvg(c pb.CalculatorServiceClient) {
@@ -162,15 +164,27 @@ func doMax(c pb.CalculatorServiceClient) {
 
 }
 
-func doSqrt(c pb.CalculatorServiceClient) {
+func doSqrt(c pb.CalculatorServiceClient, num int32) {
 	log.Println("Invoke Sqrt Func")
 
-	num := 81
 
 	res, err := c.Sqrt(context.Background(), &pb.SqrtRequest{Num: int32(num)})
 
 	if err != nil {
-		log.Fatalln(err)
+		e, ok := status.FromError(err)
+
+		if ok {
+			log.Printf("Error Message from server: %s \n", e.Message())
+			log.Printf("Error Code from server: %v \n", e.Code())
+
+			if e.Code() == codes.InvalidArgument {
+				fmt.Println("Invalid Argument")
+				return
+			}
+		} else {
+			log.Fatalf("Non gRPC error: %v \n", err.Error())
+		}
+
 	}
 
 	fmt.Printf("Square Root Result is: %.2f \n", res.Result)

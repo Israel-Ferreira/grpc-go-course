@@ -62,7 +62,10 @@ func (s *SumService) Avg(stream pb.CalculatorService_AvgServer) error {
 		req, err := stream.Recv()
 
 		if err == io.EOF {
-			total := float64(sum(numbers) / int64(len(numbers)))
+			sumVal := sum(numbers)
+
+			fmt.Println(sumVal)
+			total := float64(sumVal / float64(len(numbers)))
 
 			return stream.SendAndClose(&pb.AvgResponse{Result: total})
 		}
@@ -77,11 +80,11 @@ func (s *SumService) Avg(stream pb.CalculatorService_AvgServer) error {
 	}
 }
 
-func sum(numbers []int64) int64 {
-	var sumResult int64
+func sum(numbers []int64) float64 {
+	var sumResult float64
 
 	for _, num := range numbers {
-		sumResult += num
+		sumResult += float64(num)
 	}
 
 	return sumResult

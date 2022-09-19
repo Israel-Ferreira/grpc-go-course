@@ -41,6 +41,8 @@ func main() {
 	doDecompositePrime(service)
 
 	doGetAvg(service)
+
+	doMax(service)
 }
 
 func doGetAvg(c pb.CalculatorServiceClient) {
@@ -101,5 +103,59 @@ func doDecompositePrime(c pb.CalculatorServiceClient) {
 	} else {
 		fmt.Printf("%d is not a prime, factors : %v", req.Num, factors)
 	}
+
+}
+
+func doMax(c pb.CalculatorServiceClient) {
+	log.Println("Invoking Max function...")
+
+	stream, err := c.Max(context.Background())
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	waitch := make(chan struct{})
+
+	reqs := []*pb.MaxMsgRequest{
+		{Num: 1},
+		{Num: 5},
+		{Num: 3},
+		{Num: 6},
+		{Num: 2},
+		{Num: 20},
+	}
+
+	go func() {
+		for _, num := range reqs {
+			log.Println("Send Request to GRPC")
+			stream.Send(num)
+
+			time.Sleep(1 * time.Second)
+		}
+
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			rec, err := stream.Recv()
+
+			if err == io.EOF {
+				break
+			}
+
+			if err != nil {
+				log.Println(err.Error())
+				break
+			}
+
+			fmt.Printf("Received Num: %d \n", rec.Result)
+		}
+
+		close(waitch)
+	}()
+
+	<-waitch
 
 }

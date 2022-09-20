@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/blog/proto"
@@ -39,7 +40,30 @@ func (s *Server) CreateBlog(ctx context.Context, blog *pb.Blog) (*pb.BlogId, err
 }
 
 func (s *Server) UpdateBlog(ctx context.Context, blog *pb.Blog) (*pb.EmptyMessage, error) {
-	return nil, nil
+	log.Println("Update Function was called")
+
+	fmt.Println(blog.Id)
+	oid, err := primitive.ObjectIDFromHex(blog.Id)
+
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			"Cannot parse id to objectid",
+		)
+	}
+
+	post := models.NewBlogItem(blog)
+
+	res, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, bson.M{"$set": post})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, status.Errorf(codes.NotFound, "Id não encontrado")
+	}
+
+	fmt.Println(res)
+
+	return &pb.EmptyMessage{}, nil
 }
 
 func (s *Server) ReadBlog(ctx context.Context, blogId *pb.BlogId) (*pb.Blog, error) {

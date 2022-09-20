@@ -23,14 +23,19 @@ func main() {
 
 	service := pb.NewBlogServiceClient(conn)
 
-	createPost(service, &pb.Blog{
+	id := createPost(service, &pb.Blog{
 		AuthorId: "Israel",
 		Title:    "Teste",
 		Content:  "Criando um post qualquer",
 	})
+
+	blogId := &pb.BlogId{Id: id}
+
+	fmt.Println(blogId)
+
 }
 
-func createPost(service pb.BlogServiceClient, blog *pb.Blog) {
+func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
 	res, err := service.CreateBlog(context.Background(), blog)
 
 	if err != nil {
@@ -38,4 +43,6 @@ func createPost(service pb.BlogServiceClient, blog *pb.Blog) {
 	}
 
 	fmt.Println(res.Id)
+
+	return res.Id
 }

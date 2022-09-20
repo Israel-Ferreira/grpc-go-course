@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/blog/proto"
 	"github.com/Israel-Ferreira/grpc-go-course/blog/server/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -41,8 +42,28 @@ func (s *Server) UpdateBlog(ctx context.Context, blog *pb.Blog) (*pb.EmptyMessag
 	return nil, nil
 }
 
-func (s *Server) ReadBlog(ctx context.Context, id *pb.BlogId) (*pb.Blog, error) {
-	return nil, nil
+func (s *Server) ReadBlog(ctx context.Context, blogId *pb.BlogId) (*pb.Blog, error) {
+	postId := blogId.Id
+
+	oid, err := primitive.ObjectIDFromHex(postId)
+
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			"Cannot parse ID",
+		)
+	}
+
+	var result models.BlogItem
+
+	if err = collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&result); err != nil {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"Cannot found post by ID",
+		)
+	}
+
+	return result.DocumentToBlog(), nil
 }
 
 func (s *Server) DeleteBlog(ctx context.Context, id *pb.BlogId) (*pb.EmptyMessage, error) {

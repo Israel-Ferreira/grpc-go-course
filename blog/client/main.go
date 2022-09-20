@@ -8,6 +8,7 @@ import (
 	pb "github.com/Israel-Ferreira/grpc-go-course/blog/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -33,6 +34,9 @@ func main() {
 
 	fmt.Println(blogId)
 
+	res := findById(service, &pb.BlogId{Id: blogId.Id})
+	fmt.Println(res)
+
 }
 
 func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
@@ -45,4 +49,20 @@ func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
 	fmt.Println(res.Id)
 
 	return res.Id
+}
+
+func findById(client pb.BlogServiceClient, blogId *pb.BlogId) *pb.Blog {
+	res, err := client.ReadBlog(context.Background(), blogId)
+
+	if err != nil {
+		status, ok := status.FromError(err)
+
+		if ok {
+			log.Fatalf("Status: %s, Error: %v \n", status.Code(), err)
+		} else {
+			log.Fatalln(err)
+		}
+	}
+
+	return res
 }

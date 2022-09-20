@@ -37,6 +37,13 @@ func main() {
 	res := findById(service, &pb.BlogId{Id: blogId.Id})
 	fmt.Println(res)
 
+	updatePost(service, &pb.Blog{
+		Id:       res.Id,
+		AuthorId: "Israel",
+		Title:    "Teste",
+		Content:  "Lasanha !!!",
+	})
+
 }
 
 func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
@@ -65,4 +72,14 @@ func findById(client pb.BlogServiceClient, blogId *pb.BlogId) *pb.Blog {
 	}
 
 	return res
+}
+
+func updatePost(service pb.BlogServiceClient, blog *pb.Blog) {
+	res, err := service.UpdateBlog(context.Background(), blog)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(res)
 }

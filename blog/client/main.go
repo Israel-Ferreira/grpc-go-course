@@ -55,6 +55,7 @@ func main() {
 		fmt.Println(post)
 	}
 
+	deletePost(service, blogId)
 }
 
 func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
@@ -118,4 +119,16 @@ func listPosts(service pb.BlogServiceClient) ([]*pb.Blog, error) {
 		posts = append(posts, rec)
 	}
 
+}
+
+func deletePost(service pb.BlogServiceClient, blogId *pb.BlogId) {
+	log.Println("Fazendo a requisição para a função de Deleção de Posts")
+
+	_, err := service.DeleteBlog(context.Background(), blogId)
+
+	if err != nil {
+		log.Fatalf("Erro ao deletar o post: %s \n", err.Error())
+	}
+
+	log.Printf("Post %s deletado com sucesso \n", blogId.Id)
 }

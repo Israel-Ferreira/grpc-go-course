@@ -99,7 +99,13 @@ func (s *Server) DeleteBlog(ctx context.Context, id *pb.BlogId) (*pb.EmptyMessag
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Error on Parse ID: %v", err))
 	}
 
-	if _, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid}); err != nil {
+	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Error: %v", err))
+	}
+
+	if res.DeletedCount == 0 {
 		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Error: blog post not found, err: %v", err))
 	}
 

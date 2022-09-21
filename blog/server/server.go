@@ -95,5 +95,29 @@ func (s *Server) DeleteBlog(ctx context.Context, id *pb.BlogId) (*pb.EmptyMessag
 }
 
 func (s *Server) ListBlog(em *pb.EmptyMessage, stream pb.BlogService_ListBlogServer) error {
+	log.Println("List blog was invoked")
+
+	cursor, err := collection.Find(context.Background(), primitive.D{{}})
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "Error on consulting db: %v", err)
+	}
+
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		data := &models.BlogItem{}
+
+		if err := cursor.Decode(&data); err != nil {
+			return status.Errorf(codes.Internal, fmt.Sprintf("Error on decode data: %s", err))
+		}
+
+		stream.Send(data.DocumentToBlog())
+	}
+
+	if err := cursor.Err(); err != nil {
+		return status.Errorf(codes.Internal, fmt.Sprintf("Error in Cursor: %s", err.Error()))
+	}
+
 	return nil
 }

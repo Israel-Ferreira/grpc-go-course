@@ -91,7 +91,19 @@ func (s *Server) ReadBlog(ctx context.Context, blogId *pb.BlogId) (*pb.Blog, err
 }
 
 func (s *Server) DeleteBlog(ctx context.Context, id *pb.BlogId) (*pb.EmptyMessage, error) {
-	return nil, nil
+	log.Println("DeleteBlog was invoked!!...")
+
+	oid, err := primitive.ObjectIDFromHex(id.Id)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Error on Parse ID: %v", err))
+	}
+
+	if _, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid}); err != nil {
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Error: blog post not found, err: %v", err))
+	}
+
+	return &pb.EmptyMessage{}, nil
 }
 
 func (s *Server) ListBlog(em *pb.EmptyMessage, stream pb.BlogService_ListBlogServer) error {

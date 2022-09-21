@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	pb "github.com/Israel-Ferreira/grpc-go-course/blog/proto"
@@ -44,6 +45,16 @@ func main() {
 		Content:  "Lasanha !!!",
 	})
 
+	posts, err := listPosts(service)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, post := range posts {
+		fmt.Println(post)
+	}
+
 }
 
 func createPost(service pb.BlogServiceClient, blog *pb.Blog) string {
@@ -82,4 +93,29 @@ func updatePost(service pb.BlogServiceClient, blog *pb.Blog) {
 	}
 
 	fmt.Println(res)
+}
+
+func listPosts(service pb.BlogServiceClient) ([]*pb.Blog, error) {
+	stream, err := service.ListBlog(context.Background(), &pb.EmptyMessage{})
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	posts := []*pb.Blog{}
+
+	for {
+		rec, err := stream.Recv()
+
+		if err == io.EOF {
+			return posts, nil
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, rec)
+	}
+
 }
